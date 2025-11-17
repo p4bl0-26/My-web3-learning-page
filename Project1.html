@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- FIX #1: This line tells the browser to render emojis correctly -->
+    <meta charset="UTF-8">
+
+    <title>My Web3 Learning Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+        All the styles are now back inside this HTML file.
+    -->
+    <style>
+        /*
+          This is a CSS file. All your styles live here.
+          CSS Variables are set here. This makes it easy to change colors.
+          The :root selector refers to the whole page (the <html> element).
+        */
+        :root {
+            --bg-color: #fbebebe; /* a very light red */
+            --text-color: #333333; /* Dark grey text */
+            --card-bg: #ffffff; /* White card background */
+            --border-color: #e0e0e0;
+            --header-color: #D32F2F; /* Strong Red */
+            --section-title-color: #1976D2; /* Strong Blue */
+            --link-color: #D32F2F; /* Match header red */
+            --button-bg: #fbebebe; /* very light red */
+            --button-active-bg: #D32F2F; /* Match header */
+            --button-active-text: white;
+        }
+
+        /*
+          This .dark-mode class will be added to the <body> tag by JavaScript.
+          It just overrides the variables defined in :root.
+        */
+        body.dark-mode {
+            --bg-color: #3d2f2f; /* Dark reddish-brown */
+            --text-color: #f0f0f0; /* Light text */
+            --card-bg: #4e3a3a; /* Slightly lighter dark red */
+            --border-color: #3d2f2f;
+            --header-color: #E57373; /* Lighter red */
+            --section-title-color: #64B5F6; /* Lighter blue */
+            --link-color: #E57373;
+            --button-bg: #5f2e2e; /* Dark button bg */
+            --button-active-bg: #E57373;
+            --button-active-text: #f0f0f0;
+        }
+
+        body {
+            /* Now we use the variables! */
+            font-family: Arial, sans-serif; /* A more modern, simple font */
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition for dark mode */
+        }
+
+        /* This is the main container for the content */
+        .container {
+            max-width: 900px;
+            margin: 20px auto; /* Centers the content */
+            padding: 15px;
+        }
+
+        /* This styles the header with the title and toggle */
+        header {
+            display: flex; /* This lets us put items side-by-side */
+            justify-content: space-between; /* Puts space between the title and toggle */
+            align-items: center; /* Vertically centers them */
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* This styles the main title */
+        h1 {
+            color: var(--header-color);
+            font-size: 32px;
+            margin: 0;
+        }
+
+        /* This styles the section titles */
+        h2 {
+            color: var(--section-title-color);
+            font-size: 24px;
+            border-bottom: 1px solid var(--border-color);
+            margin-top: 30px;
+        }
+
+        /* This styles the term titles inside the cards */
+        h3 {
+            color: var(--text-color);
+            font-size: 20px;
+            margin-top: 0;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.5; /* Makes text easier to read */
+        }
+
+        a {
+            color: var(--link-color);
+            font-weight: bold;
+        }
+
+        /* This is the navigation bar for the filters */
+        .filter-nav {
+            padding: 10px 0;
+            text-align: center; /* Centers the buttons */
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer; /* Makes it look like a button */
+            border: 1px solid var(--border-color);
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border-radius: 5px; /* Simple rounded corners */
+            transition: background-color 0.2s, color 0.2s; /* Add a simple transition */
+        }
+
+        /* This style applies to the button that is currently active */
+        .filter-btn.active {
+            background-color: var(--button-active-bg);
+            color: var(--button-active-text);
+        }
+
+        /* Simple hover effect for buttons */
+        .filter-btn:not(.active):hover {
+            background-color: var(--button-active-bg);
+            color: var(--button-active-text);
+            opacity: 0.8; /* Make it slightly transparent on hover */
+        }
+
+        /* This is the container for all the topic cards */
+        .glossary-grid {
+            /* This will be filled by topic cards */
+        }
+
+        /* This is a topic section container (e.g., "Basics") */
+        .topic-section {
+            /* This div wraps a section (h2 and its cards) for filtering */
+        }
+
+        /* This styles each individual topic card */
+        .topic-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px; /* Slightly rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* A simple shadow */
+            transition: background-color 0.3s; /* Smooth transition */
+            border-top: 4px solid var(--header-color); /* Added colourful top border */
+        }
+
+        /* ----- Dark Mode Toggle Switch ----- */
+        /* This is a common "checkbox hack" to make a pretty toggle */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide the actual checkbox */
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* This is the background of the slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        /* This is the little circle that moves */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* This is what happens when the checkbox is checked (toggled on) */
+        input:checked + .slider {
+            background-color: var(--section-title-color); /* Use the blue color */
+        }
+
+        /* This moves the circle to the right when checked */
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* --- New styles for the toggle icons --- */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between icon and toggle */
+        }
+
+        .icon-sun, .icon-moon {
+            font-size: 24px; /* Make icons bigger */
+            line-height: 1; /* Keep them aligned */
+        }
+
+        .icon-moon {
+            display: none; /* Hide moon by default */
+        }
+
+        .icon-sun {
+            display: block; /* Show sun by default */
+        }
+
+        /* Show/hide icons in dark mode */
+        body.dark-mode .icon-moon {
+            display: block; /* Show moon in dark mode */
+        }
+
+        body.dark-mode .icon-sun {
+            display: none; /* Hide sun in dark mode */
+        }
+        /* ----- End of new toggle icon styles ----- */
+
+
+        /* ----- News Banner ----- */
+        .news-banner {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+        }
+
+        .news-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+        }
+
+        .news-item:last-child {
+            border-bottom: none; /* No border on the last item */
+        }
+
+        .news-item p {
+            margin: 5px 0 0 0;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <h1>My Web3 Learning Page!</h1>
+            
+            <!-- This is the HTML for the dark mode toggle switch -->
+            <div class="toggle-container">
+                <span class="icon-sun">☀️</span>
+                <span class="icon-moon">🌙</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </header>
+
+        <p>
+            Hi! I am learning about Web3. Here is a glossary of words I am learning.
+            I added a filter and dark mode!
+        </p>
+
+        <!-- This is the filter button bar -->
+        <nav class="filter-nav" id="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Show All</button>
+            <button class="filter-btn" data-filter="basic">Basics</button>
+            <button class="filter-btn" data-filter="concepts">Core Concepts</button>
+            <button class="filter-btn" data-filter="defi">DeFi</button>
+            <button class="filter-btn" data-filter="nft">NFTs & Metaverse</button>
+            <button class="filter-btn" data-filter="tech">Technology</button>
+            <button class="filter-btn" data-filter="ecosystem">Ecosystem</button>
+            <button class="filter-btn" data-filter="security">Security</button>
+        </nav>
+
+        <!-- This grid will hold all the topic sections -->
+        <div class="glossary-grid">
+
+            <!-- Section 1: Basics -->
+            <div class="topic-section" data-category="basic">
+                <h2>Basics</h2>
+                <div class="topic-card" data-category="basic">
+                    <h3>Web3</h3>
+                    <p>
+                        The "third generation" of the internet. It's an idea for a new internet built on blockchains, where users have more control and ownership over their data.
+                    </p>
+                    <a href="https://www.thealien.design/insights/what-is-web3" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=u-bO-PG-mNQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Bitcoin</h3>
+                    <p>
+                        The very first cryptocurrency. It's a form of digital money that is created and held electronically. No single person or bank controls it.
+                    </p>
+                    <a href="https://www.chamberplan.ca/product/blogs/read,article/38/bitcoin-basics-a-beginner-s-guide-to-cryptocurrency" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=dlGRE2YMD60" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Ethereum</h3>
+                    <p>
+                        A global platform for decentralized applications (dApps). While Bitcoin is just a currency, Ethereum is a network that can run "smart contracts."
+                    </p>
+                    <a href="https://www.vaneck.com/corp/en/news-and-insights/blogs/digital-assets/ethereum-101-a-beginners-guide/" target="_blank">Learn more</a>
+                    | <a href="https.www.youtube.com/watch?v=zeG3GZ-tZtQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Decentralization</h3>
+                    <p>
+                        The idea that control and decision-making are spread out among many users, rather than being controlled by one single person, company, or government.
+                    </p>
+                    <a href="https://en.wikipedia.org/wiki/Decentralization" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=1IqXknbO6cQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Ledger</h3>
+                    <p>
+                        A digital file or book that records all transactions. On a blockchain, this ledger is public and shared across many computers, making it very hard to change.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/l/ledger.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=yubzJw0uiE4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Fiat Currency</h3>
+                    <p>
+                        Government-issued money that is not backed by a physical thing (like gold). Examples are the US Dollar, Euro, or Indian Rupee. This is what crypto is an alternative to.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/f/fiatmoney.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=hK-5gJqUchI" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Blockchain</h3>
+                    <p>
+                        A blockchain is a growing list of records, called blocks, that are linked together using cryptography. It's like a digital notebook that is shared and can't be changed.
+                    </p>
+                    <a href="https://cardanofoundation.org/blog/blockchain-basics-simple-guide-beginners" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=yubzJw0uiE4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Cryptocurrency</h3>
+                    <p>
+                        A digital token. It's a digital currency that lets people make payments directly to each other online without a bank. Bitcoin is the most famous one.
+                    </p>
+                    <a href="https://www.coinbase.com/learn/crypto-basics" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=dlGRE2YMD60" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="basic">
+                    <h3>Crypto Wallet</h3>
+                    <p>
+                        A digital tool that lets you store and manage your cryptocurrencies. It holds your 'private keys' (like a password) that prove you own your crypto.
+                    </p>
+                    <a href="https://www.revolut.com/blog/post/what-is-a-crypto-wallet/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=A-a8QjA-Eag" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End Basics Section -->
+
+            <!-- Section 2: Core Concepts -->
+            <div class="topic-section" data-category="concepts">
+                <h2>Core Concepts</h2>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Public Key</h3>
+                    <p>
+                        Your 'public' address. It's like your bank account number. You can share it with anyone to receive crypto. It's generated from your private key.
+                    </p>
+                    <a href="https://www.coinbase.com/learn/crypto-basics/public-key-private-key" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=T2zA7-M-S2c" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Private Key</h3>
+                    <p>
+                        The secret password to your crypto. It proves you own your funds and lets you send them. You must NEVER share this with anyone.
+                    </p>
+                    <a href="https://www.coinbase.com/learn/crypto-basics/public-key-private-key" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=T2zA7-M-S2c" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Seed Phrase</h3>
+                    <p>
+                        A list of 12 or 24 simple words that acts as a backup for your entire crypto wallet. If you lose your wallet, you can get it back with this phrase. Keep it super safe and offline.
+                    </p>
+                    <a href="https://www.blockchain.com/learning-portal/lessons/seed-phrases-explained" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=gofI-1y3SjE" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Consensus Mechanism</h3>
+                    <p>
+                        The rules a blockchain uses to agree on which new transactions are real. It's how all the computers in the network agree on the "truth" without trusting each other.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/c/consensus-mechanism-cryptocurrency.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=yubzJw0uiE4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Proof-of-Work (PoW)</h3>
+                    <p>
+                        The consensus mechanism used by Bitcoin. "Miners" use powerful computers to solve a hard puzzle. The first one to solve it gets to add the next block and is rewarded.
+                    </p>
+                    <a href="https://learn.g2.com/proof-of-work-vs-proof-of-stake" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=h3GcNZVsKh0" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Proof-of-Stake (PoS)</h3>
+                    <p>
+                        A popular alternative to PoW. "Validators" lock up their own crypto (a "stake") to get a chance to add the next block. It's much more energy-efficient.
+                    </p>
+                    <a href="https://learn.g2.com/proof-of-work-vs-proof-of-stake" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=h3GcNZVsKh0" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Mining</h3>
+                    <p>
+                        The process of creating new bitcoins (or other PoW coins) by solving complex puzzles with computers. This is also how new transactions are added to the blockchain.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/b/bitcoin-mining.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=B8i-XUp8jGk" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Node</h3>
+                    <p>
+                        A computer that connects to the blockchain network. It helps validate transactions and keep the network secure by holding a copy of the ledger.
+                    </p>
+                    <a href="https://www.coinbase.com/learn/crypto-basics/what-is-a-node" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=yubzJw0uiE4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Token vs. Coin</h3>
+                    <p>
+                        A "Coin" (like Bitcoin) runs on its own blockchain. A "Token" (like UNI) is built on top of an existing blockchain, like Ethereum.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/c/coin-cryptocurrency.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=1IqXknbO6cQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Governance Token</h3>
+                    <p>
+                        A special token that gives you voting rights in a dApp or DAO. The more tokens you have, the more power your vote has on new proposals.
+                    </p>
+                    <a href="https://www.investopedia.com/governance-token-5206013" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=3J5L40MJfU4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Smart Contract</h3>
+                    <p>
+                        A computer program stored on a blockchain. It's an agreement in code that automatically runs when certain conditions are met. Think of it like a digital vending machine.
+                    </p>
+                    <a href="https://coinbureau.com/education/ethereum-smart-contracts/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=zeG3GZ-tZtQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>dApp (Decentralized Application)</h3>
+                    <p>
+                        A 'decentralized application'. It's like a normal app, but it runs on a blockchain using smart contracts. This means it isn't controlled by one single person or company.
+                    </p>
+                    <a href="https://www.coinbase.com/learn/wallet/guide-to-dapps" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=u-bO-PG-mNQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>DAO (Decentralized Autonomous Org)</h3>
+                    <p>
+                        An organization managed by its members and run by code on a blockchain. There is no central boss; decisions are made by voting with tokens.
+                    </p>
+                    <a href="https://koinly.io/blog/daos-decentralized-autonomous-organizations/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=3J5L40MJfU4" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="concepts">
+                    <h3>Gas Fees</h3>
+                    <p>
+                        The transaction cost users pay to execute operations on a blockchain. You pay 'gas' to have miners or validators process and approve your transaction (like sending crypto).
+                    </p>
+                    <a href="https://www.uniblock.dev/glossary/gas-fees-web3-explained" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=s_oVn1nEo-8" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End Concepts Section -->
+
+            <!-- Section 3: DeFi -->
+            <div class="topic-section" data-category="defi">
+                <h2>Finance (DeFi)</h2>
+                <div class="topic-card" data-category="defi">
+                    <h3>Liquidity Pool</h3>
+                    <p>
+                        A big pot of two different tokens locked in a smart contract. These pools are what allow you to instantly swap tokens on a Decentralized Exchange (DEX).
+                    </p>
+                    <a href="https://www.coinbase.com/learn/crypto-basics/what-is-a-liquidity-pool" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=cizLhxL-gT0" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>Yield Farming</h3>
+                    <p>
+                        The practice of lending or staking your crypto in a DeFi app to earn rewards. People "farm" for the highest "yield" (reward rate) by moving their money around.
+                    </p>
+                    <a href="https://www.investopedia.com/yield-farming-51YieldFarming" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=p2jq_1yYyYg" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>AMM (Automated Market Maker)</h3>
+                    <p>
+                        The smart contract that runs a DEX. It uses a math formula and a liquidity pool to set the price for tokens automatically, without needing a traditional "order book".
+                    </p>
+                    <a href="https://www.investopedia.com/terms/a/automated-market-maker-amm.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=1-oWWbV1YgE" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>Stablecoin</h3>
+                    <p>
+                        A type of cryptocurrency whose value is "pegged" to a real-world asset, usually the US dollar. This keeps its price stable (e.g., 1 USDC = $1).
+                    </p>
+                    <a href="https://www.investopedia.com/terms/s/stablecoin.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=vFWi_bM0-sQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>Oracle</h3>
+                    <p>
+                        A service that brings real-world information (like stock prices or weather) onto the blockchain. Smart contracts need oracles to work with data that isn't on the chain.
+                    </p>
+                    <a href="https://chain.link/education/blockchain-oracles" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=t-1-9_f0Hog" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>DeFi (Decentralized Finance)</h3>
+                    <p>
+                        A peer-to-peer system of financial tools (like lending or trading) built on a blockchain, without needing to use traditional banks.
+                    </p>
+                    <a href="https://www.investopedia.com/decentralized-finance-defi-5113835" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=vfwzDaJ6ZDg" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>DEX (Decentralized Exchange)</h3>
+                    <p>
+                        A peer-to-peer marketplace where transactions occur directly between crypto traders. There is no central company holding the funds (like Coinbase or Binance do).
+                    </p>
+                    <a href="https://www.coinbase.com/en-in/learn/crypto-basics/what-is-a-dex" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=JNHPvk-3I6s" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="defi">
+                    <h3>Staking</h3>
+                    <p>
+                        The process of locking up your cryptocurrency for a period of time to help support the operation and security of a blockchain network. In return, you earn rewards (more crypto).
+                    </p>
+                    <a href="https://www.gemini.com/cryptopedia/staking-crypto" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=C-K-32j0n8I" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End DeFi Section -->
+
+            <!-- Section 4: NFTs & Metaverse -->
+            <div class="topic-section" data-category="nft">
+                <h2>NFTs & Metaverse</h2>
+                <div class="topic-card" data-category="nft">
+                    <h3>Minting</h3>
+                    <p>
+                        The process of creating a new NFT. "Minting" is when you publish your digital art or item onto the blockchain, turning it into an NFT that can be bought or sold.
+                    </p>
+                    <a href="https://www.bitpanda.com/en/academy/nft-minting-creating-nfts-in-five-steps" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=jS-y-e-0g1I" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="nft">
+                    <h3>Airdrop</h3>
+                    <p>
+                        A free giveaway of tokens or NFTs to a large number of people. Projects do this to get attention, find new users, or reward their early supporters.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/a/airdrop-cryptocurrency.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=8pA-bSjH0Fw" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="nft">
+                    <h3>PFP (Profile Picture)</h3>
+                    <p>
+                        A very popular type of NFT. These are collections of thousands of unique characters (like CryptoPunks or Bored Apes) that people use as their profile pictures on social media.
+                    </p>
+                    <a href="https://www.coindesk.com/learn/what-are-pfp-nfts/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=a8ww4aNlPQU" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="nft">
+                    <h3>NFT Marketplace</h3>
+                    <p>
+                        A website where you can buy, sell, or mint NFTs. The biggest one on Ethereum is called OpenSea.
+                    </p>
+                    <a href="https://www.investopedia.com/nft-marketplace-5215222" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=G3cTNw-v12o" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="nft">
+                    <h3>NFT (Non-Fungible Token)</h3>
+                    <p>
+                        Stands for 'non-fungible token'. 'Non-fungible' means it's unique and can't be replaced. It's a digital certificate on a blockchain that proves you own a unique digital item, like art or a video.
+                    </p>
+                    <a href="https://www.investopedia.com/how-to-buy-and-sell-nfts-6361693" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=a8ww4aNlPQU" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="nft">
+                    <h3>Metaverse</h3>
+                    <p>
+                        A virtual world where users, represented by avatars, can interact, socialize, work, and play. Many metaverses use blockchain to let users own and trade digital land and items as NFTs.
+                    </p>
+                    <a href="https://en.wikipedia.org/wiki/Metaverse" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=UvVnSjLHiqE" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End NFT Section -->
+
+            <!-- Section 5: Technology -->
+            <div class="topic-section" data-category="tech">
+                <h2>Technology</h2>
+                <div class="topic-card" data-category="tech">
+                    <h3>Layer 1 (L1)</h3>
+                    <p>
+                        The main, base-level blockchain, like Bitcoin or Ethereum. These networks are secure but can sometimes be slow and expensive.
+                    </p>
+                    <a href="https://zebpay.com/in/blog/top-10-layer-1-blockchain-crypto-coins" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/shorts/VF5IK0mZAQc" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="tech">
+                    <h3>Layer 2 (L2)</h3>
+                    <p>
+                        A separate blockchain that runs on top of a main blockchain (a 'Layer 1' like Ethereum). Layer 2s are designed to be faster and have lower gas fees, making the network more efficient.
+                    </p>
+                    <a href="https://www.geeksforgeeks.org/ethical-hacking/what-are-layer-2-solutions-in-blockchain/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=d7ulxd3R97E" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="tech">
+                    <h3>Rollups</h3>
+                    <p>
+                        A popular type of Layer 2. They "roll up" hundreds of transactions into a single batch and send just that one batch to the Layer 1, saving a lot of money on gas fees.
+                    </p>
+                    <a href="https://www.coinbase.com/en-in/learn/wallet/what-are-rollups-in-crypto" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=8BFKnFbHS3U" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="tech">
+                    <h3>Blockchain Bridge</h3>
+                    <p>
+                        A tool that connects two different blockchains, allowing you to send tokens or data from one chain to another (e.g., from Ethereum to Polygon).
+                    </p>
+                    <a href="https://www.ledger.com/academy/whats-a-blockchain-bridge" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=1IqXknbO6cQ" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="tech">
+                    <h3>IPFS (InterPlanetary File System)</h3>
+                    <p>
+                        A decentralized system for storing files. Instead of a file living on one server (like "google.com/image.jpg"), it's stored in pieces across many computers. Many NFTs store their art on IPFS.
+                    </p>
+                    <a href="httpshttps://ipfs.tech/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=5Uj6uR3GpcA" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="tech">
+                    <h3>EVM (Ethereum Virtual Machine)</h3>
+                    <p>
+                        The "brain" of Ethereum that runs the smart contracts. It's the computer inside the network that does all the calculations. Many other blockchains are "EVM-compatible," meaning they can run the same code.
+                    </p>
+                    <a href="https://www.investopedia.com/terms/e/ethereum-virtual-machine-evm.asp" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=k_q-n-sLVFk" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End Tech Section -->
+
+            <!-- Section 6: Ecosystem -->
+            <div class="topic-section" data-category="ecosystem">
+                <h2>Ecosystem</h2>
+                <div class="topic-card" data-category="ecosystem">
+                    <h3>MetaMask</h3>
+                    <p>
+                        The most popular crypto wallet for Ethereum and EVM chains. It's a browser extension or mobile app that lets you connect to dApps, send transactions, and manage your assets.
+                    </p>
+                    <a href="https://metamask.io/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=YVgfHl9iF-U" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="ecosystem">
+                    <h3>Solana</h3>
+                    <p>
+                        A popular Layer 1 blockchain that is known for being extremely fast and very cheap. It is a major competitor to Ethereum but works differently.
+                    </p>
+                    <a href="https://solana.com/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=1j_1-M-1-b8" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="ecosystem">
+                    <h3>Polygon (Matic)</h3>
+                    <p>
+                        A popular Layer 2 scaling solution for Ethereum. It's a "sidechain" that is fast and cheap, making it very popular for dApps and NFTs.
+                    </p>
+                    <a href="https://polygon.technology/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=T-21hJ-Q-Dk" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End Ecosystem Section -->
+
+            <!-- Section 7: Security -->
+            <div class="topic-section" data-category="security">
+                <h2>Security</h2>
+                <div class="topic-card" data-category="security">
+                    <h3>Hot Wallet</h3>
+                    <p>
+                        A crypto wallet that is connected to the internet (like MetaMask or a phone app). It's convenient for daily use, but less secure.
+                    </p>
+                    <a href="https://www.geeksforgeeks.org/ethical-hacking/hot-wallets-vs-cold-wallets-in-blockchain/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/shorts/XoSmWuNVCC8" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="security">
+                    <h3>Cold Wallet (Hardware Wallet)</h3>
+                    <p>
+                        A physical device (like a USB drive) that stores your private keys completely offline. This is the safest way to store a large amount of crypto.
+                    </p>
+                    <a href="https://www.geeksforgeeks.org/ethical-hacking/hot-wallets-vs-cold-wallets-in-blockchain/" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/shorts/XoSmWuNVCC8" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="security">
+                    <h3>Phishing</h3>
+                    <p>
+                        A scam where someone tricks you into giving them your private key or seed phrase, often by making a fake website that looks real.
+                    </p>
+                    <a href="https://consumer.ftc.gov/articles/what-know-about-cryptocurrency-scams" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=F3a_EAfTExE" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="security">
+                    <h3>Rug Pull</h3>
+                    <p>
+                        A scam where the developers of a new crypto project abandon it and run away with all the investors' money.
+                    </p>
+                    <a href="https://www.datavisor.com/wiki/rug-pull-scams" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=gEJ-mclV-aM" target="_blank">Watch video</a>
+                </div>
+                <div class="topic-card" data-category="security">
+                    <h3>Smart Contract Audit</h3>
+                    <p>
+                        A process where a security company checks the code of a smart contract for bugs or security holes before it's released. It's like a safety inspection.
+                    </p>
+                    <a href="https://www.investopedia.com/smart-contract-audit-5650138" target="_blank">Learn more</a>
+                    | <a href="https://www.youtube.com/watch?v=f-p0gIJN-Gk" target="_blank">Watch video</a>
+                </div>
+            </div> <!-- End Security Section -->
+
+        </div> <!-- End .glossary-grid -->
+
+
+        <!-- This is the separate section for images -->
+        <div class="topic-card">
+            <h2>Where to find Free Web3 Images</h2>
+            <p>
+                Here are some websites where you can find free-to-use pictures of "web3" or "crypto".
+                Always check the license for each picture before you use it!
+            </p>
+            <ul>
+                <li>
+                    <a href="https://unsplash.com/s/photos/web3" target="_blank">Search Unsplash for 'web3'</a>
+                </li>
+                <li>
+                    <a href="https://www.pexels.com/search/web3/" target="_blank">Search Pexels for 'web3'</a>
+                </li>
+                <li>
+                    <a href="https://pixabay.com/images/search/web3/" target="_blank">Search Pixabay for 'web3'</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- This is the new News Banner -->
+        <div class="news-banner">
+            <h2>Latest Web3 News</h2>
+            <div id="news-content">
+                <p>Loading news...</p>
+                <!-- JavaScript will put news items here -->
+            </div>
+        </div>
+
+    </div> <!-- End .container -->
+
+
+    <!--
+        All the JavaScript is now back inside this HTML file.
+        The 'defer' attribute tells the browser to wait until the HTML
+        is loaded before running the script.
+    -->
+        <script defer>
+        // This is a JavaScript file.
+        // We wait for the HTML to be fully loaded before running any code.
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Dark Mode Toggle Logic ---
+
+            // 1. Find the toggle checkbox in the HTML
+            const darkModeToggle = document.getElementById('darkModeToggle');
+
+            // 2. Add a "click" (or "change") event listener to it
+            darkModeToggle.addEventListener('change', () => {
+                // 3. When clicked, add or remove the "dark-mode" class from the <body>
+                document.body.classList.toggle('dark-mode');
+            });
+
+
+            // --- Filter Logic ---
+
+            // 1. Find all the filter buttons and all the topic sections
+            const filterButtonsContainer = document.getElementById('filter-buttons');
+            const topicSections = document.querySelectorAll('.topic-section'); // Gets a list of all sections
+
+            // 2. Add a click listener to the *container* holding the buttons
+            filterButtonsContainer.addEventListener('click', (event) => {
+                
+                // 3. Check if the clicked item is a button
+                if (event.target.classList.contains('filter-btn')) {
+                    
+                    // Get the category to filter by (e.g., "basic", "defi", "all")
+                    const filter = event.target.getAttribute('data-filter');
+
+                    // --- Update active button visual ---
+                    // First, remove 'active' from all buttons
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // Then, add 'active' to the one just clicked
+                    event.target.classList.add('active');
+
+                    // --- Show or hide the topic sections ---
+                    topicSections.forEach(section => {
+                        const sectionCategory = section.getAttribute('data-category');
+
+                        if (filter === 'all' || filter === sectionCategory) {
+                            section.style.display = 'block'; // Show this section
+                        } else {
+                            section.style.display = 'none'; // Hide this section
+                        }
+                    });
+                }
+            });
+
+
+            // --- News Banner Logic (API Call) ---
+            
+            // This is an "async" function, which means it can wait for the API call
+            // FIX #2: Replaced the failing API call with a simple "mock" function
+            // that shows example news.
+            function loadMockNews() {
+                // 1. Find the HTML element where we will put the news
+                const newsContent = document.getElementById('news-content');
+                
+                // 2. Create our fake news articles
+                const mockArticles = [
+                    {
+                        title: "New Layer 2 Solution Announced on Ethereum",
+                        summary: "A new project announced a new L2 rollup today, promising faster transactions and lower gas fees for users.",
+                        url: "#" // Use '#' as a placeholder link
+                    },
+                    {
+                        title: "Major DAO Votes to Fund New DeFi Project",
+                        summary: "In a landmark vote, 'ExampleDAO' has decided to fund a new decentralized exchange with its community treasury.",
+                        url: "#"
+                    },
+                    {
+                        title: "NFT Art Collection Sells Out in Minutes",
+                        summary: "The much-anticipated 'Pixel Wizards' NFT collection sold out all 10,000 items just moments after launching.",
+                        url: "#"
+                    }
+                ];
+
+                // 3. Clear the "Loading..." message
+                newsContent.innerHTML = "";
+
+                // 4. Loop through the articles and create HTML for them
+                mockArticles.forEach(article => {
+                    // Create a new div element for the news item
+                    const item = document.createElement('div');
+                    item.className = 'news-item'; // Use the CSS class we made
+                    
+                    // Set the HTML inside the new div
+                    item.innerHTML = `
+                        <strong><a href="${article.url}" target="_blank">${article.title}</a></strong>
+                        <p>${article.summary}</p>
+                    `;
+                    
+                    // Add the new item to the page
+                    newsContent.appendChild(item);
+                });
+            }
+
+            // --- Run the news fetch function ---
+            loadMockNews(); // Call the mock news function
+
+        }); // End of the 'DOMContentLoaded' event listener
+    </script>
+
+</body>
+</html>
